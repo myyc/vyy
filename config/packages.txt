@@ -43,6 +43,8 @@ iwd
 iproute2
 iputils
 wireless-regdb
+avahi
+nss-mdns
 
 # =============================================================================
 # OSTree
@@ -177,6 +179,11 @@ fwupd
 sg3_utils
 tuned
 tuned-ppd
+
+# Bluetooth
+bluez
+bluez-utils
+gnome-bluetooth-3.0
 
 # =============================================================================
 # Sync/P2P/VPN

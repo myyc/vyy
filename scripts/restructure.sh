@@ -277,6 +277,26 @@ if [[ -f "$ROOT/usr/lib/systemd/system/flatpak-system-helper.service" ]]; then
         "$ROOT/usr/etc/systemd/system/multi-user.target.wants/flatpak-system-helper.service"
 fi
 
+# systemd-resolved (DNS)
+if [[ -f "$ROOT/usr/lib/systemd/system/systemd-resolved.service" ]]; then
+    ln -sf /usr/lib/systemd/system/systemd-resolved.service \
+        "$ROOT/usr/etc/systemd/system/multi-user.target.wants/systemd-resolved.service"
+    # Symlink resolv.conf to systemd-resolved
+    ln -sf /run/systemd/resolve/stub-resolv.conf "$ROOT/usr/etc/resolv.conf"
+fi
+
+# Bluetooth
+if [[ -f "$ROOT/usr/lib/systemd/system/bluetooth.service" ]]; then
+    ln -sf /usr/lib/systemd/system/bluetooth.service \
+        "$ROOT/usr/etc/systemd/system/multi-user.target.wants/bluetooth.service"
+fi
+
+# Avahi (mDNS)
+if [[ -f "$ROOT/usr/lib/systemd/system/avahi-daemon.service" ]]; then
+    ln -sf /usr/lib/systemd/system/avahi-daemon.service \
+        "$ROOT/usr/etc/systemd/system/multi-user.target.wants/avahi-daemon.service"
+fi
+
 # -----------------------------------------------------------------------------
 # 11. REGENERATE LINKER CACHE
 # -----------------------------------------------------------------------------
