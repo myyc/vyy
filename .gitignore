@@ -10,9 +10,6 @@
 /keys/gh-token
 /.secrets/
 
-# Not yet supported
-/scripts/server-build.sh
-
 # OS junk
 .DS_Store
 .AppleDouble
