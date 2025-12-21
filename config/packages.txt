@@ -1,0 +1,185 @@
+# vyy package set
+# One package per line, comments start with #
+
+# =============================================================================
+# Core System
+# =============================================================================
+base
+linux-cachyos
+linux-firmware
+
+# Boot
+grub
+efibootmgr
+dracut
+plymouth
+mokutil
+
+# =============================================================================
+# System Services
+# =============================================================================
+systemd
+dbus
+polkit
+apparmor
+accountsservice
+fprintd
+
+# =============================================================================
+# Filesystem
+# =============================================================================
+btrfs-progs
+e2fsprogs
+dosfstools
+cryptsetup
+lvm2
+
+# =============================================================================
+# Networking
+# =============================================================================
+networkmanager
+wpa_supplicant
+iwd
+iproute2
+iputils
+wireless-regdb
+
+# =============================================================================
+# OSTree
+# =============================================================================
+ostree
+skopeo
+
+# =============================================================================
+# Containers & Virtualization
+# =============================================================================
+podman
+crun
+fuse-overlayfs
+netavark
+aardvark-dns
+slirp4netns
+distrobox
+flatpak
+
+# =============================================================================
+# Desktop - GNOME
+# =============================================================================
+gnome-shell
+gdm
+gnome-control-center
+nautilus
+gnome-software
+xorg-xwayland
+gnome-keyring
+gnome-backgrounds
+gnome-themes-extra
+wl-clipboard
+evolution-data-server
+
+# Input methods
+ibus
+m17n-lib
+m17n-db
+ibus-unikey
+ibus-anthy
+ibus-hangul
+ibus-libpinyin
+ibus-chewing
+hunspell
+
+# =============================================================================
+# Audio/Video
+# =============================================================================
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+wireplumber
+
+# Codecs
+ffmpeg
+ffmpegthumbnailer
+gst-plugins-good
+gst-plugins-bad
+gst-plugins-ugly
+gst-libav
+
+# =============================================================================
+# User Tools
+# =============================================================================
+sudo
+
+# Shells
+fish
+bash
+
+# Terminal
+alacritty
+tmux
+
+# Editors
+neovim
+
+# CLI utilities
+git
+bat
+lsd
+fd
+fzf
+less
+which
+file
+tar
+gzip
+xz
+zstd
+wget
+curl
+rsync
+jq
+tree
+nano
+diffutils
+patch
+zip
+p7zip
+htop
+btop
+lsof
+strace
+man-db
+
+# Network tools
+nmap
+tcpdump
+openssh
+nftables
+
+# =============================================================================
+# Fonts
+# =============================================================================
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+ttf-dejavu
+ttf-jetbrains-mono-nerd
+adwaita-fonts
+
+# =============================================================================
+# Hardware
+# =============================================================================
+android-tools
+pciutils
+usbutils
+lm_sensors
+fwupd
+sg3_utils
+tuned
+tuned-ppd
+
+# =============================================================================
+# Sync/P2P/VPN
+# =============================================================================
+syncthing
+nebula

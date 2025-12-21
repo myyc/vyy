@@ -1,0 +1,37 @@
+# Build
+/work/
+/.aur-cache/
+/.bin-cache/
+/ostree/
+*.log
+
+# Keys and secrets
+/keys/*.key
+/keys/gh-token
+/.secrets/
+
+# Not yet supported
+/scripts/server-build.sh
+
+# OS junk
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Desktop.ini
+
+# Editor/IDE
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-*
+.project
+.settings/
+
+# Claude
+/.claude/

@@ -1,0 +1,7 @@
+# AUR packages to build and cache
+# Built by aur-check.sh, cached in /var/cache/vyy/aur/
+# Format: one package name per line
+
+bootc
+mullvad-vpn-cli
+ibus-m17n
