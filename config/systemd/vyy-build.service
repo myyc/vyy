@@ -1,0 +1,11 @@
+[Unit]
+Description=vyy daily build
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/PATH/vyy/scripts/daily-build.sh  # put the same path
+WorkingDirectory=/PATH/vyy                  # in both of these
+StandardOutput=journal
+StandardError=journal

@@ -50,6 +50,10 @@ You will lose out-of-the-box secure boot this way but you can
 create your own keys. As long as the paths are right the scripts
 will do it for you.
 
+You could also use `scripts/daily-build.sh` and the systemd
+units if you have a server to run this on; edit the placeholders
+first though.
+
 ### Is this even safe
 
 The "install Silverblue" part is pretty much what makes this distro
