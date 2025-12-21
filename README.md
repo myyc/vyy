@@ -33,7 +33,6 @@ sudo mokutil --import /usr/share/vyy/secureboot.cer
 ### Build it yourself
 
 * Install Silverblue, or Kinoite, or Bazzite, or whatever
-* Run `scripts/aur-check.sh`
 * Run `scripts/dev.sh` as root (yes, sorry).
 * From there, run `build-vyy-root.sh`
 * Commit to your ostree repo, deploy and reboot.

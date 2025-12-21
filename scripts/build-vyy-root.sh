@@ -108,34 +108,107 @@ arch-chroot "$ROOT" pacman-key --init 2>/dev/null || true
 arch-chroot "$ROOT" pacman-key --populate archlinux cachyos 2>/dev/null || true
 
 # -----------------------------------------------------------------------------
-# 5. Install AUR packages (from local cache)
+# 5. Install AUR packages (build if missing/outdated)
 # -----------------------------------------------------------------------------
 echo ">>> Installing AUR packages..."
 
 AUR_CACHE="${VYY_AUR_CACHE:-$(dirname "$SCRIPT_DIR")/.aur-cache}"
 AUR_PACKAGES_FILE="$CONFIG_DIR/aur-packages.txt"
+AUR_BUILD_DIR="$AUR_CACHE/build"
+
+mkdir -p "$AUR_CACHE"
+mkdir -p "$AUR_BUILD_DIR"
+
+get_aur_version() {
+    curl -s "https://aur.archlinux.org/rpc/?v=5&type=info&arg=$1" | \
+        grep -o '"Version":"[^"]*"' | cut -d'"' -f4
+}
+
+get_cached_version() {
+    local version_file="$AUR_CACHE/${1}.version"
+    [[ -f "$version_file" ]] && cat "$version_file" || echo ""
+}
+
+build_aur_package() {
+    local pkg="$1"
+    local aur_ver="$2"
+    local pkg_dir="$AUR_BUILD_DIR/$pkg"
+
+    echo "  Building $pkg..."
+    rm -rf "$pkg_dir"
+    git clone --depth 1 "https://aur.archlinux.org/${pkg}.git" "$pkg_dir"
+
+    # Install makedepends
+    (
+        source "$pkg_dir/PKGBUILD"
+        if [[ -n "${makedepends[*]:-}" ]]; then
+            pacman -S --noconfirm --needed "${makedepends[@]}" 2>/dev/null || true
+        fi
+    )
+
+    # Build as builder user
+    chown -R builder:builder "$pkg_dir"
+
+    # Extract sources first
+    su builder -c "cd '$pkg_dir' && makepkg --noconfirm --skippgpcheck --nobuild -s" || true
+
+    # Init git in source dirs (some packages check git toplevel)
+    for d in "$pkg_dir"/src/*/; do
+        if [[ -d "$d" && ! -d "$d/.git" ]]; then
+            su builder -c "cd '$d' && git init && git add -A && git commit -m init" 2>/dev/null || true
+        fi
+    done
+
+    # Continue build
+    chown -R builder:builder "$pkg_dir"
+    su builder -c "cd '$pkg_dir' && makepkg --noconfirm --skippgpcheck -e"
+
+    # Cache the package
+    local pkg_file
+    pkg_file=$(ls "$pkg_dir"/*.pkg.tar.zst 2>/dev/null | head -1)
+    if [[ -n "$pkg_file" ]]; then
+        rm -f "$AUR_CACHE/${pkg}"-*.pkg.tar.zst
+        cp "$pkg_file" "$AUR_CACHE/"
+        echo "$aur_ver" > "$AUR_CACHE/${pkg}.version"
+        echo "  Cached: $(basename "$pkg_file")"
+    else
+        echo "  ERROR: Build failed for $pkg"
+        return 1
+    fi
+
+    rm -rf "$pkg_dir"
+}
 
 install_aur_package() {
-    local pkg_name="$1"
+    local pkg="$1"
 
-    # Skip if already installed
-    if arch-chroot "$ROOT" pacman -Q "$pkg_name" &>/dev/null; then
-        echo "  $pkg_name already installed, skipping"
-        return 0
+    # Check versions
+    local aur_ver cached_ver
+    aur_ver=$(get_aur_version "$pkg")
+    cached_ver=$(get_cached_version "$pkg")
+
+    if [[ -z "$aur_ver" ]]; then
+        echo "  WARNING: $pkg not found in AUR"
+        return 1
     fi
 
-    # Install from local cache
+    echo "  $pkg: AUR=$aur_ver, cached=${cached_ver:-none}"
+
+    # Build if missing or outdated
+    if [[ -z "$cached_ver" ]] || [[ "$aur_ver" != "$cached_ver" ]]; then
+        build_aur_package "$pkg" "$aur_ver"
+    fi
+
+    # Install from cache
     local cached_pkg
-    cached_pkg=$(ls "$AUR_CACHE"/${pkg_name}-*.pkg.tar.zst 2>/dev/null | head -1)
+    cached_pkg=$(ls "$AUR_CACHE"/${pkg}-*.pkg.tar.zst 2>/dev/null | head -1)
     if [[ -n "$cached_pkg" ]]; then
-        echo "  Installing $pkg_name from cache..."
+        echo "  Installing $pkg..."
         pacman -r "$ROOT" -U --noconfirm "$cached_pkg"
-        return 0
+    else
+        echo "  ERROR: $pkg not found in cache after build"
+        return 1
     fi
-
-    echo "  ERROR: $pkg_name not found in cache at $AUR_CACHE"
-    echo "  Run aur-check.sh first to build AUR packages"
-    return 1
 }
 
 # Install each AUR package from config
@@ -147,6 +220,8 @@ if [[ -f "$AUR_PACKAGES_FILE" ]]; then
 else
     echo "  No AUR packages file found at $AUR_PACKAGES_FILE"
 fi
+
+rm -rf "$AUR_BUILD_DIR"
 
 # -----------------------------------------------------------------------------
 # 6. Basic configuration
