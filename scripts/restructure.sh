@@ -279,8 +279,15 @@ fi
 
 # systemd-resolved (DNS)
 if [[ -f "$ROOT/usr/lib/systemd/system/systemd-resolved.service" ]]; then
+    mkdir -p "$ROOT/usr/etc/systemd/system/sysinit.target.wants"
     ln -sf /usr/lib/systemd/system/systemd-resolved.service \
-        "$ROOT/usr/etc/systemd/system/multi-user.target.wants/systemd-resolved.service"
+        "$ROOT/usr/etc/systemd/system/sysinit.target.wants/systemd-resolved.service"
+    ln -sf /usr/lib/systemd/system/systemd-resolved.service \
+        "$ROOT/usr/etc/systemd/system/dbus-org.freedesktop.resolve1.service"
+    ln -sf /usr/lib/systemd/system/systemd-resolved-varlink.socket \
+        "$ROOT/usr/etc/systemd/system/sockets.target.wants/systemd-resolved-varlink.socket"
+    ln -sf /usr/lib/systemd/system/systemd-resolved-monitor.socket \
+        "$ROOT/usr/etc/systemd/system/sockets.target.wants/systemd-resolved-monitor.socket"
     # Symlink resolv.conf to systemd-resolved
     ln -sf /run/systemd/resolve/stub-resolv.conf "$ROOT/usr/etc/resolv.conf"
 fi
