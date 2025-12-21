@@ -27,6 +27,9 @@ echo "Starting build container..."
 podman run -it --rm \
     --privileged \
     --network=host \
+    --pid=host \
+    -v /proc:/proc \
+    -v /sys:/sys \
     -v "$PROJECT_DIR/work:/vyy-root" \
     -v "$PROJECT_DIR/scripts:/scripts:ro" \
     -v "$PROJECT_DIR/config:/config:ro" \
