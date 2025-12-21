@@ -23,8 +23,8 @@ Install Guide
 sudo bootc switch ghcr.io/myyc/vyy:latest
 ```
 
-Reboot. The kernel is signed so you can enable secure boot after
-trusting the key
+Reboot. `bootc upgrade` to update it. The kernel is signed so you can 
+enable secure boot after trusting the key.
 
 ```
 sudo mokutil --import /usr/share/vyy/secureboot.cer

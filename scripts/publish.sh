@@ -50,6 +50,7 @@ echo "  Version: $VERSION"
 echo "=== Pushing to GHCR ==="
 "$BIN_CACHE/ostree-ext-cli" container encapsulate \
     --repo="$OSTREE_REPO" \
+    --label ostree.bootable=true \
     vyy \
     "docker://$GHCR_IMAGE:$VERSION"
 
