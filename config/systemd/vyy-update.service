@@ -1,0 +1,10 @@
+[Unit]
+Description=Download vyy updates
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bootc upgrade
+StandardOutput=journal
+StandardError=journal

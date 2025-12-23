@@ -1,0 +1,28 @@
+# vyy pacman.conf
+# CachyOS repositories
+
+[options]
+HoldPkg     = pacman glibc
+Architecture = auto
+Color
+ILoveCandy
+VerbosePkgLists
+ParallelDownloads = 10
+SigLevel    = Required DatabaseOptional
+LocalFileSigLevel = Optional
+
+@OPTIMIZED_REPOS@
+
+[cachyos]
+Include = /etc/pacman.d/cachyos-mirrorlist
+
+# Standard Arch repositories
+[core]
+Include = /etc/pacman.d/mirrorlist
+
+[extra]
+Include = /etc/pacman.d/mirrorlist
+
+# Multilib (32-bit support - needed for some apps like Steam)
+[multilib]
+Include = /etc/pacman.d/mirrorlist
