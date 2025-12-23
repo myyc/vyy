@@ -71,8 +71,11 @@ Include = /etc/pacman.d/cachyos${REPOS_SUFFIX}-mirrorlist
     fi
 
     # Generate pacman.conf from template
-    sed "s|@OPTIMIZED_REPOS@|$optimized_repos|g" \
-        "$CONFIG_DIR/pacman.conf.template" > /etc/pacman.conf
+    {
+        sed '/@OPTIMIZED_REPOS@/,$d' "$CONFIG_DIR/pacman.conf.template"
+        echo "$optimized_repos"
+        sed '1,/@OPTIMIZED_REPOS@/d' "$CONFIG_DIR/pacman.conf.template"
+    } > /etc/pacman.conf
 }
 
 generate_pacman_conf
