@@ -5,7 +5,9 @@ set -euo pipefail
 ROOT="${1:-/vyy-root}"
 OSTREE_REPO="/ostree-repo"
 BIN_CACHE="/bin-cache"
-GHCR_IMAGE="ghcr.io/myyc/vyy"
+ARCH="${VYY_ARCH:-zen4}"
+GHCR_IMAGE="ghcr.io/myyc/vyy-$ARCH"
+OSTREE_BRANCH="vyy-$ARCH"
 VERSION=$(date +%Y%m%d)
 
 # Build ostree-ext-cli if not cached
@@ -38,8 +40,8 @@ if [[ ! -d "$OSTREE_REPO/objects" ]]; then
 fi
 
 # Commit to local repo
-echo "=== Committing to OSTree ==="
-COMMIT=$(ostree commit --repo="$OSTREE_REPO" --branch=vyy \
+echo "=== Committing to OSTree ($ARCH) ==="
+COMMIT=$(ostree commit --repo="$OSTREE_REPO" --branch="$OSTREE_BRANCH" \
     --skip-list=/config/ostree-skip-list \
     --owner-uid=0 --owner-gid=0 "$ROOT")
 echo "  Commit: $COMMIT"
@@ -51,7 +53,7 @@ echo "=== Pushing to GHCR ==="
 "$BIN_CACHE/ostree-ext-cli" container encapsulate \
     --repo="$OSTREE_REPO" \
     --label ostree.bootable=true \
-    vyy \
+    "$OSTREE_BRANCH" \
     "docker://$GHCR_IMAGE:$VERSION"
 
 # Tag as latest

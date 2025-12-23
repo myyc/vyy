@@ -100,9 +100,9 @@ core one is `bootc`. If you want to build locally you don't need it,
 you only need vanilla ostree. You don't even need it if you want
 to update from your own ostree repo.
 
-The other two packages are more of a personal convenience. They're
-the Mullvad CLI and `ibus-m17n` which is required for certain
-input methods.
+The other packages are more of a personal convenience. They're
+the Mullvad CLI, `ibus-m17n` which is required for certain
+input methods, and `raw-thumbnailer`.
 
 Why not NixOS at this point?
 ----------------------------

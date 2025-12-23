@@ -5,3 +5,4 @@
 bootc
 mullvad-vpn-cli
 ibus-m17n
+raw-thumbnailer

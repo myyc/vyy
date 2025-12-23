@@ -8,7 +8,16 @@ ROOT="${1:-/vyy-root}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$(dirname "$SCRIPT_DIR")/config"
 
-echo "=== vyy build ==="
+# Load architecture config
+ARCH="${VYY_ARCH:-zen4}"
+ARCH_CONFIG="$CONFIG_DIR/architectures/${ARCH}.conf"
+if [[ ! -f "$ARCH_CONFIG" ]]; then
+    echo "Error: Unknown architecture '$ARCH'"
+    exit 1
+fi
+source "$ARCH_CONFIG"
+
+echo "=== vyy build ($ARCH_NAME) ==="
 
 # -----------------------------------------------------------------------------
 # 1. Prepare target directory
@@ -23,7 +32,7 @@ echo ">>> Setting up repositories..."
 
 mkdir -p "$ROOT/etc/pacman.d"
 
-# Set up reliable European Arch mirrors on HOST
+# Set up reliable European Arch mirrors
 cat > /etc/pacman.d/mirrorlist << 'EOF'
 Server = https://geo.mirror.pkgbuild.com/$repo/os/$arch
 Server = https://mirror.leaseweb.net/archlinux/$repo/os/$arch
@@ -31,33 +40,50 @@ Server = https://ftp.fau.de/archlinux/$repo/os/$arch
 Server = https://mirror.netcologne.de/archlinux/$repo/os/$arch
 EOF
 
-# Ensure mirrorlists exist
-if [[ ! -f /etc/pacman.d/cachyos-mirrorlist ]]; then
-    echo "  Creating cachyos-mirrorlist..."
-    cat > /etc/pacman.d/cachyos-mirrorlist << 'EOF'
+# CachyOS generic mirrorlist
+cat > /etc/pacman.d/cachyos-mirrorlist << 'EOF'
 Server = https://mirror.cachyos.org/repo/$arch/$repo
 Server = https://de-1.cachyos.org/repo/$arch/$repo
 Server = https://de-2.cachyos.org/repo/$arch/$repo
 EOF
-fi
 
-if [[ ! -f /etc/pacman.d/cachyos-v4-mirrorlist ]]; then
-    echo "  Creating cachyos-v4-mirrorlist..."
-    cat > /etc/pacman.d/cachyos-v4-mirrorlist << 'EOF'
-Server = https://mirror.cachyos.org/repo/$arch_v4/$repo
-Server = https://de-1.cachyos.org/repo/$arch_v4/$repo
-Server = https://de-2.cachyos.org/repo/$arch_v4/$repo
+# Generate optimized repos section based on architecture
+generate_pacman_conf() {
+    local optimized_repos=""
+
+    if [[ -n "$REPOS_SUFFIX" ]]; then
+        # v3 or v4 optimized repos
+        cat > "/etc/pacman.d/cachyos${REPOS_SUFFIX}-mirrorlist" << EOF
+Server = https://mirror.cachyos.org/repo/${MIRROR_VAR}/\$repo
+Server = https://de-1.cachyos.org/repo/${MIRROR_VAR}/\$repo
+Server = https://de-2.cachyos.org/repo/${MIRROR_VAR}/\$repo
 EOF
-fi
+        optimized_repos="# CachyOS ${ARCH_NAME} optimized repositories
+[cachyos${REPOS_SUFFIX}]
+Include = /etc/pacman.d/cachyos${REPOS_SUFFIX}-mirrorlist
 
-# Copy mirrorlists to target
+[cachyos-core${REPOS_SUFFIX}]
+Include = /etc/pacman.d/cachyos${REPOS_SUFFIX}-mirrorlist
+
+[cachyos-extra${REPOS_SUFFIX}]
+Include = /etc/pacman.d/cachyos${REPOS_SUFFIX}-mirrorlist
+"
+    fi
+
+    # Generate pacman.conf from template
+    sed "s|@OPTIMIZED_REPOS@|$optimized_repos|g" \
+        "$CONFIG_DIR/pacman.conf.template" > /etc/pacman.conf
+}
+
+generate_pacman_conf
+
+# Copy to target
 cp /etc/pacman.d/mirrorlist "$ROOT/etc/pacman.d/"
 cp /etc/pacman.d/cachyos-mirrorlist "$ROOT/etc/pacman.d/"
-cp /etc/pacman.d/cachyos-v4-mirrorlist "$ROOT/etc/pacman.d/"
-
-# Install our pacman.conf on HOST (for pacstrap) and target
-cp "$CONFIG_DIR/pacman.conf" /etc/pacman.conf
-cp "$CONFIG_DIR/pacman.conf" "$ROOT/etc/pacman.conf"
+if [[ -n "$REPOS_SUFFIX" ]]; then
+    cp "/etc/pacman.d/cachyos${REPOS_SUFFIX}-mirrorlist" "$ROOT/etc/pacman.d/"
+fi
+cp /etc/pacman.conf "$ROOT/etc/pacman.conf"
 
 # -----------------------------------------------------------------------------
 # 3. Bootstrap with pacman -r (no user namespaces needed)
