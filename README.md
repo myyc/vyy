@@ -12,6 +12,9 @@ And yes, it works perfectly in its current state.
 This README isn't written by an AI though so you can at least take it
 at face value.
 
+**Warning**: This project is work-in-progress and even though it is
+very usable and stable it might miss some random stuff here and there.
+
 Install Guide
 -------------
 
@@ -20,7 +23,7 @@ Install Guide
 * Install Silverblue, or Kinoite, or Bazzite, or whatever
 
 ```
-sudo bootc switch ghcr.io/myyc/vyy:latest
+sudo bootc switch ghcr.io/myyc/vyy-zen4:latest
 ```
 
 Reboot. `bootc upgrade` to update it. The kernel is signed so you can 
@@ -30,11 +33,14 @@ enable secure boot after trusting the key.
 sudo mokutil --import /usr/share/vyy/secureboot.cer
 ```
 
+There are no `zen3` builds uploaded but you can build one
+yourself.
+
 ### Build it yourself
 
 * Install Silverblue, or Kinoite, or Bazzite, or whatever
-* Run `scripts/dev.sh` as root (yes, sorry).
-* From there, run `build-vyy-root.sh`
+* Run `scripts/dev.sh zen3` as root (yes, sorry).
+* From there, run `build-vyy-root.sh zen3`
 * Commit to your ostree repo, deploy and reboot.
 
 ```
@@ -53,6 +59,10 @@ will do it for you.
 You could also use `scripts/daily-build.sh` and the systemd
 units if you have a server to run this on; edit the placeholders
 first though.
+
+All the scripts default to `zen4` but you can launch them with
+`zen3` or `generic` as arguments. I haven't tested these two, but
+they should work.
 
 ### Is this even safe
 
