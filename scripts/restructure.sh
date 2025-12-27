@@ -108,6 +108,10 @@ cat > "$ROOT/usr/lib/kernel/cmdline" << 'EOF'
 lsm=landlock,lockdown,yama,integrity,apparmor,bpf
 EOF
 
+# Coredump configuration
+mkdir -p "$ROOT/usr/lib/systemd/coredump.conf.d"
+cp "$CONFIG_DIR/coredump.conf" "$ROOT/usr/lib/systemd/coredump.conf.d/vyy.conf"
+
 # -----------------------------------------------------------------------------
 # 5. SYSTEM USERS/GROUPS
 # -----------------------------------------------------------------------------
