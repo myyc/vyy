@@ -31,17 +31,13 @@ echo ">>> Updating repo..."
 git pull
 
 # Generate Containerfile from template
-generate_containerfile() {
-    sed "s|@BASE_IMAGE@|$BASE_IMAGE|g" \
-        "$PROJECT_DIR/Containerfile.template" > "$PROJECT_DIR/Containerfile"
-}
+sed "s|@BASE_IMAGE@|$BASE_IMAGE|g" \
+    "$PROJECT_DIR/Containerfile.template" > "$PROJECT_DIR/Containerfile"
 
-# Build container image if needed
-if ! podman image exists "$IMAGE_NAME"; then
-    echo ">>> Building container image for $ARCH_NAME..."
-    generate_containerfile
-    podman build --network=host -t "$IMAGE_NAME" -f Containerfile .
-fi
+# Always rebuild container with latest base image
+echo ">>> Building container image for $ARCH_NAME..."
+podman pull "$BASE_IMAGE"
+podman build --network=host -t "$IMAGE_NAME" -f Containerfile .
 
 # Create work directories
 mkdir -p "$PROJECT_DIR/work"

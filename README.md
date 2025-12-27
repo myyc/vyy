@@ -33,7 +33,7 @@ enable secure boot after trusting the key.
 sudo mokutil --import /usr/share/vyy/secureboot.cer
 ```
 
-There are no `zen3` builds uploaded but you can build one
+There are no automated `zen3` builds but you can build one
 yourself.
 
 ### Build it yourself
@@ -75,6 +75,15 @@ default configures `btrfs` and has native encryption, so hooray.
 This is also why you can use this sort of thing on relatively critical
 devices – I literally developed all of this on the only device I had
 access too, for work included. It doesn't boot? Roll back and forget.
+
+The deployed system keeps your `/etc` and, slightly less intuitively,
+your kernel parameters, even though they're nowhere besides `/proc`.
+If you want to edit them the process is a bit of a leap of faith
+since there is no `rpm-ostree`. Assuming you're in your *latest*
+build (i.e. not something that will be overwritten on reboot), you
+need to edit your current build's entry in `/boot/loader/entries`,
+reboot, and then whichever update will use the new parameters as a
+base.
 
 No package manager?
 -------------------
