@@ -149,6 +149,7 @@ zip
 p7zip
 htop
 btop
+powertop
 lsof
 strace
 man-db
