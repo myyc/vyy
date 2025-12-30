@@ -71,6 +71,12 @@ gnome-shell
 gdm
 gnome-control-center
 nautilus
+gvfs-smb
+gvfs-mtp
+gvfs-afc
+gvfs-gphoto2
+gvfs-nfs
+gvfs-goa
 gnome-software
 xorg-xwayland
 gnome-keyring
