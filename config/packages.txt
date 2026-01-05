@@ -156,6 +156,7 @@ p7zip
 htop
 btop
 powertop
+fastfetch
 lsof
 strace
 man-db

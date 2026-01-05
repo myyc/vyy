@@ -112,6 +112,12 @@ EOF
 mkdir -p "$ROOT/usr/lib/systemd/coredump.conf.d"
 cp "$CONFIG_DIR/coredump.conf" "$ROOT/usr/lib/systemd/coredump.conf.d/vyy.conf"
 
+# Fastfetch branding
+mkdir -p "$ROOT/usr/share/vyy"
+mkdir -p "$ROOT/usr/etc/fastfetch"
+cp "$CONFIG_DIR/fastfetch-logo" "$ROOT/usr/share/vyy/logo"
+cp "$CONFIG_DIR/fastfetch-config.jsonc" "$ROOT/usr/etc/fastfetch/config.jsonc"
+
 # -----------------------------------------------------------------------------
 # 5. SYSTEM USERS/GROUPS
 # -----------------------------------------------------------------------------
