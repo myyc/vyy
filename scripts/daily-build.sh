@@ -68,8 +68,9 @@ podman run --rm \
         /scripts/build-vyy-root.sh && /scripts/publish.sh
     '
 
-# Clean work dir
+# Clean up
 echo ">>> Cleaning up..."
 rm -rf "$PROJECT_DIR/work"/*
+rm -f "$PROJECT_DIR/Containerfile"
 
 echo "=== Done ($ARCH_NAME) $(date) ==="
