@@ -1,7 +1,8 @@
 #!/bin/bash
 # Development helper - build and enter the vyy build container
-# Usage: ./dev.sh [rebuild] [arch]
+# Usage: ./dev.sh [rebuild] [arch] [feature]
 # arch: zen4 (default), zen3, generic
+# feature: nvidia (optional)
 
 set -e
 
@@ -11,10 +12,12 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 # Parse arguments
 REBUILD=""
 ARCH="zen4"
+FEATURE=""
 for arg in "$@"; do
     case "$arg" in
         rebuild) REBUILD="1" ;;
         zen4|zen3|generic) ARCH="$arg" ;;
+        nvidia) FEATURE="$arg" ;;
     esac
 done
 
@@ -26,6 +29,17 @@ if [[ ! -f "$ARCH_CONFIG" ]]; then
     exit 1
 fi
 source "$ARCH_CONFIG"
+
+# Load feature config if specified
+if [[ -n "$FEATURE" ]]; then
+    FEATURE_CONFIG="$PROJECT_DIR/config/features/${FEATURE}.conf"
+    if [[ ! -f "$FEATURE_CONFIG" ]]; then
+        echo "Error: Unknown feature '$FEATURE'"
+        echo "Available: nvidia"
+        exit 1
+    fi
+    source "$FEATURE_CONFIG"
+fi
 
 IMAGE_NAME="vyy-build:$ARCH_NAME"
 
@@ -50,8 +64,12 @@ mkdir -p "$PROJECT_DIR/.aur-cache"
 mkdir -p "$PROJECT_DIR/.bin-cache"
 mkdir -p "$PROJECT_DIR/ostree"
 
+# Compute variant name for display
+VARIANT="$ARCH_NAME"
+[[ -n "$FEATURE" ]] && VARIANT="$ARCH_NAME-$FEATURE"
+
 # Run container
-echo "Starting build container ($ARCH_NAME)..."
+echo "Starting build container ($VARIANT)..."
 podman run -it --rm \
     --privileged \
     --network=host \
@@ -67,17 +85,20 @@ podman run -it --rm \
     -v "$PROJECT_DIR/ostree:/ostree-repo:rw" \
     -e VYY_AUR_CACHE=/aur-cache \
     -e VYY_ARCH="$ARCH" \
+    -e VYY_FEATURE="$FEATURE" \
     "$IMAGE_NAME" \
     /bin/bash -c '
         export PATH="/bin-cache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-        echo "=== vyy build container ($VYY_ARCH) ==="
+        VARIANT="$VYY_ARCH"
+        [[ -n "$VYY_FEATURE" ]] && VARIANT="$VYY_ARCH-$VYY_FEATURE"
+        echo "=== vyy build container ($VARIANT) ==="
         echo ""
         echo "Available scripts:"
         echo "  /scripts/build-vyy-root.sh  - Build full system to /vyy-root"
         echo "  /scripts/publish.sh         - Commit to OSTree and push to GHCR"
         echo ""
         echo "Target root: /vyy-root"
-        echo "Architecture: $VYY_ARCH"
+        echo "Variant: $VARIANT"
         echo ""
         exec /bin/bash
     '

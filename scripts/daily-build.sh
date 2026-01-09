@@ -1,15 +1,17 @@
 #!/bin/bash
 # Daily build script - run via cron or manually
-# Usage: ./daily-build.sh [arch]
+# Usage: ./daily-build.sh [arch] [feature]
 # arch: zen4 (default), zen3, generic
+# feature: nvidia (optional)
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Parse architecture argument
+# Parse arguments
 ARCH="${1:-zen4}"
+FEATURE="${2:-}"
 
 # Load architecture config
 ARCH_CONFIG="$PROJECT_DIR/config/architectures/${ARCH}.conf"
@@ -20,11 +22,26 @@ if [[ ! -f "$ARCH_CONFIG" ]]; then
 fi
 source "$ARCH_CONFIG"
 
+# Load feature config if specified
+if [[ -n "$FEATURE" ]]; then
+    FEATURE_CONFIG="$PROJECT_DIR/config/features/${FEATURE}.conf"
+    if [[ ! -f "$FEATURE_CONFIG" ]]; then
+        echo "Error: Unknown feature '$FEATURE'"
+        echo "Available: nvidia"
+        exit 1
+    fi
+    source "$FEATURE_CONFIG"
+fi
+
+# Compute variant name
+VARIANT="$ARCH_NAME"
+[[ -n "$FEATURE" ]] && VARIANT="$ARCH_NAME-$FEATURE"
+
 IMAGE_NAME="vyy-build:$ARCH_NAME"
 
 cd "$PROJECT_DIR"
 
-echo "=== vyy daily build ($ARCH_NAME) $(date) ==="
+echo "=== vyy daily build ($VARIANT) $(date) ==="
 
 # Update repo
 echo ">>> Updating repo..."
@@ -62,6 +79,7 @@ podman run --rm \
     -v "$PROJECT_DIR/ostree:/ostree-repo:rw" \
     -e VYY_AUR_CACHE=/aur-cache \
     -e VYY_ARCH="$ARCH" \
+    -e VYY_FEATURE="$FEATURE" \
     "$IMAGE_NAME" \
     /bin/bash -c '
         export PATH="/bin-cache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -73,4 +91,4 @@ echo ">>> Cleaning up..."
 rm -rf "$PROJECT_DIR/work"/*
 rm -f "$PROJECT_DIR/Containerfile"
 
-echo "=== Done ($ARCH_NAME) $(date) ==="
+echo "=== Done ($VARIANT) $(date) ==="

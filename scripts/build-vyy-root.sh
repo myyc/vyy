@@ -17,7 +17,23 @@ if [[ ! -f "$ARCH_CONFIG" ]]; then
 fi
 source "$ARCH_CONFIG"
 
-echo "=== vyy build ($ARCH_NAME) ==="
+# Load feature config if specified
+FEATURE="${VYY_FEATURE:-}"
+FEATURE_PACKAGES=""
+if [[ -n "$FEATURE" ]]; then
+    FEATURE_CONFIG="$CONFIG_DIR/features/${FEATURE}.conf"
+    if [[ -f "$FEATURE_CONFIG" ]]; then
+        source "$FEATURE_CONFIG"
+    else
+        echo "Warning: Feature config '$FEATURE' not found"
+    fi
+fi
+
+# Compute variant name
+VARIANT="$ARCH_NAME"
+[[ -n "$FEATURE" ]] && VARIANT="$ARCH_NAME-$FEATURE"
+
+echo "=== vyy build ($VARIANT) ==="
 
 # -----------------------------------------------------------------------------
 # 1. Prepare target directory
@@ -120,6 +136,12 @@ retry pacman -Syy
 
 # Read packages from file, filter comments and empty lines
 PACKAGES=$(grep -v '^#' "$CONFIG_DIR/packages.txt" | grep -v '^$' | tr '\n' ' ')
+
+# Append feature packages if specified
+if [[ -n "$FEATURE_PACKAGES" ]]; then
+    echo "  Adding feature packages: $FEATURE_PACKAGES"
+    PACKAGES="$PACKAGES $FEATURE_PACKAGES"
+fi
 
 # Install packages to target root (no chroot, no user namespaces)
 retry pacman -r "$ROOT" -Sy --noconfirm --needed $PACKAGES

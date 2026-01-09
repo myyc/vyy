@@ -8,6 +8,9 @@ ROOT="${1:-/vyy-root}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_DIR="$(dirname "$SCRIPT_DIR")/config"
 
+# Get feature from environment
+FEATURE="${VYY_FEATURE:-}"
+
 if [[ ! -d "$ROOT/usr" ]]; then
     echo "Error: $ROOT/usr not found. Is this a valid build root?"
     exit 1
@@ -314,6 +317,16 @@ if [[ -f "$ROOT/usr/lib/systemd/system/avahi-daemon.service" ]]; then
         "$ROOT/usr/etc/systemd/system/multi-user.target.wants/avahi-daemon.service"
 fi
 
+# CUPS (printing) - socket activated
+if [[ -f "$ROOT/usr/lib/systemd/system/cups.socket" ]]; then
+    mkdir -p "$ROOT/usr/etc/systemd/system/sockets.target.wants"
+    ln -sf /usr/lib/systemd/system/cups.socket \
+        "$ROOT/usr/etc/systemd/system/sockets.target.wants/cups.socket"
+    # Install CUPS config (localhost only)
+    mkdir -p "$ROOT/usr/etc/cups"
+    cp "$CONFIG_DIR/cupsd.conf" "$ROOT/usr/etc/cups/cupsd.conf"
+fi
+
 # -----------------------------------------------------------------------------
 # 11. REGENERATE LINKER CACHE
 # -----------------------------------------------------------------------------
@@ -457,6 +470,12 @@ if [[ -d "$CONFIG_DIR/dracut.conf.d" ]]; then
     cp -v "$CONFIG_DIR/dracut.conf.d/"* "$ROOT/usr/lib/dracut/dracut.conf.d/"
 else
     echo "  WARNING: $CONFIG_DIR/dracut.conf.d not found!"
+fi
+
+# For nvidia feature: remove nvidia from omit_drivers so it's included in initramfs
+if [[ "$FEATURE" == "nvidia" ]]; then
+    echo "  Enabling NVIDIA drivers in initramfs..."
+    sed -i 's/ nvidia / /' "$ROOT/usr/lib/dracut/dracut.conf.d/vyy.conf"
 fi
 
 # Temporarily populate /etc for dracut (it expects files there during build)

@@ -1,32 +1,58 @@
 #!/bin/bash
-# Build all architectures
-# Usage: ./build-all.sh [--parallel]
+# Build multiple variants
+# Usage: ./build-all.sh [variant...]
+# variant: arch or arch-feature (e.g., zen4, zen3-nvidia)
+# If no variants specified, builds: zen4 zen3 generic
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ARCHITECTURES=(zen4 zen3 generic)
 
-# Check for parallel flag
+# Default variants if none specified
+DEFAULT_VARIANTS=(zen4 zen3 generic)
+
+# Parse arguments
+VARIANTS=()
 PARALLEL=""
-if [[ "${1:-}" == "--parallel" ]]; then
-    PARALLEL="1"
+for arg in "$@"; do
+    case "$arg" in
+        --parallel) PARALLEL="1" ;;
+        *) VARIANTS+=("$arg") ;;
+    esac
+done
+
+# Use defaults if no variants specified
+if [[ ${#VARIANTS[@]} -eq 0 ]]; then
+    VARIANTS=("${DEFAULT_VARIANTS[@]}")
 fi
 
-echo "=== vyy multi-arch build $(date) ==="
-echo "Architectures: ${ARCHITECTURES[*]}"
+# Parse variant into arch and feature
+parse_variant() {
+    local variant="$1"
+    if [[ "$variant" == *-nvidia ]]; then
+        ARCH="${variant%-nvidia}"
+        FEATURE="nvidia"
+    else
+        ARCH="$variant"
+        FEATURE=""
+    fi
+}
+
+echo "=== vyy multi-variant build $(date) ==="
+echo "Variants: ${VARIANTS[*]}"
 echo ""
 
 if [[ -n "$PARALLEL" ]]; then
     echo ">>> Building in parallel..."
     pids=()
-    for arch in "${ARCHITECTURES[@]}"; do
+    for variant in "${VARIANTS[@]}"; do
         (
-            echo "[$arch] Starting..."
-            if "$SCRIPT_DIR/daily-build.sh" "$arch" > "/tmp/vyy-build-$arch.log" 2>&1; then
-                echo "[$arch] Success"
+            parse_variant "$variant"
+            echo "[$variant] Starting..."
+            if "$SCRIPT_DIR/daily-build.sh" "$ARCH" "$FEATURE" > "/tmp/vyy-build-$variant.log" 2>&1; then
+                echo "[$variant] Success"
             else
-                echo "[$arch] FAILED - check /tmp/vyy-build-$arch.log"
+                echo "[$variant] FAILED - check /tmp/vyy-build-$variant.log"
             fi
         ) &
         pids+=($!)
@@ -48,14 +74,15 @@ if [[ -n "$PARALLEL" ]]; then
 else
     echo ">>> Building sequentially..."
     failed=()
-    for arch in "${ARCHITECTURES[@]}"; do
+    for variant in "${VARIANTS[@]}"; do
+        parse_variant "$variant"
         echo ""
-        echo ">>> Building $arch..."
-        if "$SCRIPT_DIR/daily-build.sh" "$arch"; then
-            echo "[$arch] Success"
+        echo ">>> Building $variant..."
+        if "$SCRIPT_DIR/daily-build.sh" "$ARCH" "$FEATURE"; then
+            echo "[$variant] Success"
         else
-            echo "[$arch] FAILED"
-            failed+=("$arch")
+            echo "[$variant] FAILED"
+            failed+=("$variant")
         fi
     done
 

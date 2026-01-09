@@ -6,8 +6,14 @@ ROOT="${1:-/vyy-root}"
 OSTREE_REPO="/ostree-repo"
 BIN_CACHE="/bin-cache"
 ARCH="${VYY_ARCH:-zen4}"
-GHCR_IMAGE="ghcr.io/myyc/vyy-$ARCH"
-OSTREE_BRANCH="vyy-$ARCH"
+FEATURE="${VYY_FEATURE:-}"
+
+# Compute variant name
+VARIANT="$ARCH"
+[[ -n "$FEATURE" ]] && VARIANT="$ARCH-$FEATURE"
+
+GHCR_IMAGE="ghcr.io/myyc/vyy-$VARIANT"
+OSTREE_BRANCH="vyy-$VARIANT"
 VERSION=$(date +%Y%m%d)
 
 # Build ostree-ext-cli if not cached
@@ -40,7 +46,7 @@ if [[ ! -d "$OSTREE_REPO/objects" ]]; then
 fi
 
 # Commit to local repo
-echo "=== Committing to OSTree ($ARCH) ==="
+echo "=== Committing to OSTree ($VARIANT) ==="
 COMMIT=$(ostree commit --repo="$OSTREE_REPO" --branch="$OSTREE_BRANCH" \
     --skip-list=/config/ostree-skip-list \
     --owner-uid=0 --owner-gid=0 "$ROOT")
