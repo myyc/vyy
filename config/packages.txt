@@ -49,6 +49,12 @@ nss-mdns
 # Printing
 cups
 cups-filters
+cups-pk-helper
+system-config-printer
+foomatic-db
+foomatic-db-engine
+foomatic-db-ppds
+foomatic-db-nonfree-ppds
 
 # =============================================================================
 # OSTree
