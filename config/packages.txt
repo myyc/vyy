@@ -73,6 +73,7 @@ aardvark-dns
 slirp4netns
 distrobox
 flatpak
+lxc
 
 # =============================================================================
 # Desktop - GNOME
