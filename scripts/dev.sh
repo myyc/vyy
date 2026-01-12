@@ -58,9 +58,9 @@ if [[ -n "$REBUILD" ]] || ! podman image exists "$IMAGE_NAME"; then
     podman build --network=host -t "$IMAGE_NAME" -f Containerfile .
 fi
 
-# Create work directories
+# Create work directories (AUR cache is per-architecture)
 mkdir -p "$PROJECT_DIR/work"
-mkdir -p "$PROJECT_DIR/.aur-cache"
+mkdir -p "$PROJECT_DIR/.aur-cache-$ARCH_NAME"
 mkdir -p "$PROJECT_DIR/.bin-cache"
 mkdir -p "$PROJECT_DIR/ostree"
 
@@ -80,7 +80,7 @@ podman run -it --rm \
     -v "$PROJECT_DIR/scripts:/scripts:ro" \
     -v "$PROJECT_DIR/config:/config:ro" \
     -v "$PROJECT_DIR/keys:/keys:ro" \
-    -v "$PROJECT_DIR/.aur-cache:/aur-cache:rw" \
+    -v "$PROJECT_DIR/.aur-cache-$ARCH_NAME:/aur-cache:rw" \
     -v "$PROJECT_DIR/.bin-cache:/bin-cache:rw" \
     -v "$PROJECT_DIR/ostree:/ostree-repo:rw" \
     -e VYY_AUR_CACHE=/aur-cache \

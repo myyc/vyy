@@ -1,7 +1,7 @@
 # Build
 /work/
 /Containerfile
-/.aur-cache/
+/.aur-cache*/
 /.bin-cache/
 /ostree/
 *.log
