@@ -127,8 +127,9 @@ cp "$CONFIG_DIR/fastfetch-config.jsonc" "$ROOT/usr/etc/fastfetch/config.jsonc"
 echo ">>> Setting up system users/groups..."
 
 # Packages ship their own /usr/lib/sysusers.d/*.conf files
-# systemd-sysusers creates users at boot from these configs
-echo "  Using package-provided sysusers.d configs (systemd-sysusers at boot)"
+# Run systemd-sysusers now to pre-create users (OSTree boot triggers aren't reliable)
+echo "  Running systemd-sysusers..."
+systemd-sysusers --root="$ROOT"
 
 # -----------------------------------------------------------------------------
 # 6. PAM CONFIG (fingerprint support)
@@ -411,9 +412,9 @@ ERRORS=0
 # Check package sysusers.d configs exist
 if [[ -f "$ROOT/usr/lib/sysusers.d/basic.conf" ]]; then
     SYSUSERS_COUNT=$(ls "$ROOT/usr/lib/sysusers.d/"*.conf 2>/dev/null | wc -l)
-    echo "  OK: $SYSUSERS_COUNT sysusers.d configs found (package-provided)"
+    echo "  OK: $SYSUSERS_COUNT sysusers.d configs found"
 else
-    echo "  WARNING: No sysusers.d configs found - system users may not be created"
+    echo "  WARNING: No sysusers.d configs found"
 fi
 
 # Check /usr/etc/passwd exists and has root
@@ -430,14 +431,16 @@ fi
 # Check critical system users exist (in /usr/etc/passwd from pacstrap)
 for user in root gdm polkitd dbus; do
     if ! grep -q "^${user}:" "$ROOT/usr/etc/passwd" 2>/dev/null; then
-        echo "  WARNING: System user '$user' not in /usr/etc/passwd (will be created by sysusers)"
+        echo "  ERROR: System user '$user' not in /usr/etc/passwd (sysusers should have created it)"
+        ERRORS=$((ERRORS + 1))
     fi
 done
 
 # Check critical groups exist
 for group in root wheel video audio gdm; do
     if ! grep -q "^${group}:" "$ROOT/usr/etc/group" 2>/dev/null; then
-        echo "  WARNING: System group '$group' not in /usr/etc/group (will be created by sysusers)"
+        echo "  ERROR: System group '$group' not in /usr/etc/group (sysusers should have created it)"
+        ERRORS=$((ERRORS + 1))
     fi
 done
 
