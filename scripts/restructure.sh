@@ -536,6 +536,13 @@ fi
 rm -rf "$ROOT/etc"
 mkdir -p "$ROOT/etc"
 
+# Verify /etc is empty
+if [[ -n "$(ls -A "$ROOT/etc" 2>/dev/null)" ]]; then
+    echo "  ERROR: /etc is not empty after cleanup:"
+    ls -la "$ROOT/etc"
+    ERRORS=$((ERRORS + 1))
+fi
+
 # Check os-release
 if [[ ! -f "$ROOT/usr/lib/os-release" ]]; then
     echo "  ERROR: /usr/lib/os-release not found"
