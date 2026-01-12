@@ -85,6 +85,12 @@ chmod 1777 "$ROOT/tmp"
 mkdir -p "$ROOT/var/lib/polkit-1"
 chown 102:102 "$ROOT/var/lib/polkit-1" 2>/dev/null || true
 
+# Fix polkit D-Bus service file (upstream bug: User=root conflicts with systemd User=polkitd)
+POLKIT_DBUS="$ROOT/usr/share/dbus-1/system-services/org.freedesktop.PolicyKit1.service"
+if [[ -f "$POLKIT_DBUS" ]]; then
+    sed -i 's/User=root/User=polkitd/' "$POLKIT_DBUS"
+fi
+
 # /usr/local -> /var/usrlocal (user additions persist)
 rm -rf "$ROOT/usr/local"
 mkdir -p "$ROOT/var/usrlocal"
