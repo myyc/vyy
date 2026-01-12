@@ -128,8 +128,17 @@ echo ">>> Setting up system users/groups..."
 
 # Packages ship their own /usr/lib/sysusers.d/*.conf files
 # Run systemd-sysusers now to pre-create users (OSTree boot triggers aren't reliable)
+# sysusers writes to /etc, so we copy to /usr/etc for OSTree
 echo "  Running systemd-sysusers..."
 systemd-sysusers --root="$ROOT"
+
+# Move sysusers output to /usr/etc (OSTree manages /etc at runtime)
+for f in passwd group shadow gshadow; do
+    if [[ -f "$ROOT/etc/$f" ]]; then
+        cp -a "$ROOT/etc/$f" "$ROOT/usr/etc/$f"
+        rm -f "$ROOT/etc/$f"
+    fi
+done
 
 # -----------------------------------------------------------------------------
 # 6. PAM CONFIG (fingerprint support)
@@ -523,10 +532,9 @@ else
 fi
 
 # Clean up temp /etc files (OSTree will manage /etc)
-rm -rf "$ROOT/etc/dracut.conf.d"
-rm -f "$ROOT/etc/shadow" "$ROOT/etc/passwd" "$ROOT/etc/group"
-rm -f "$ROOT/etc/locale.conf"
-rm -rf "$ROOT/etc/plymouth"
+# Remove everything - /etc should be empty in the committed tree
+rm -rf "$ROOT/etc"
+mkdir -p "$ROOT/etc"
 
 # Check os-release
 if [[ ! -f "$ROOT/usr/lib/os-release" ]]; then
