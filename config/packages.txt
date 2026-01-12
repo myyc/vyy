@@ -74,6 +74,7 @@ slirp4netns
 distrobox
 flatpak
 lxc
+sshfs
 
 # =============================================================================
 # Desktop - GNOME
