@@ -201,6 +201,7 @@ fwupd
 sg3_utils
 tuned
 tuned-ppd
+zram-generator
 
 # Bluetooth
 bluez

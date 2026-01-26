@@ -121,6 +121,10 @@ EOF
 mkdir -p "$ROOT/usr/lib/systemd/coredump.conf.d"
 cp "$CONFIG_DIR/coredump.conf" "$ROOT/usr/lib/systemd/coredump.conf.d/vyy.conf"
 
+# zram swap (Fedora-style compressed RAM swap)
+mkdir -p "$ROOT/usr/lib/systemd/zram-generator.conf.d"
+cp "$CONFIG_DIR/zram-generator.conf" "$ROOT/usr/lib/systemd/zram-generator.conf.d/vyy.conf"
+
 # Fastfetch branding
 mkdir -p "$ROOT/usr/share/vyy"
 mkdir -p "$ROOT/usr/etc/fastfetch"
