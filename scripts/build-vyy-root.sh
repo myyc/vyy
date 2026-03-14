@@ -143,12 +143,11 @@ if [[ -n "$FEATURE_PACKAGES" ]]; then
     PACKAGES="$PACKAGES $FEATURE_PACKAGES"
 fi
 
-# Disable dracut hook during install (we regenerate initramfs in restructure.sh)
-mkdir -p "$ROOT/usr/share/libalpm/hooks"
-ln -sf /dev/null "$ROOT/usr/share/libalpm/hooks/90-dracut-install.hook"
-
 # Install packages to target root (no chroot, no user namespaces)
 retry pacman -r "$ROOT" -Sy --noconfirm --needed $PACKAGES
+
+# Disable dracut hook before AUR installs (we regenerate initramfs in restructure.sh)
+ln -sf /dev/null "$ROOT/usr/share/libalpm/hooks/90-dracut-install.hook"
 
 # -----------------------------------------------------------------------------
 # 4. Setup package signing keys
