@@ -3,7 +3,7 @@
 # Format: one package name per line
 
 bootc
-mullvad-vpn-cli
+mullvad-vpn-bin
 ibus-m17n
 raw-thumbnailer
 epson-inkjet-printer-escpr2

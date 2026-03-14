@@ -240,7 +240,8 @@ install_aur_package() {
     cached_ver=$(get_cached_version "$pkg")
 
     if [[ -z "$aur_ver" ]]; then
-        echo "  WARNING: $pkg not found in AUR"
+        echo "  ERROR: $pkg not found in AUR - check package name"
+        AUR_ERRORS=$((AUR_ERRORS + 1))
         return 1
     fi
 
@@ -263,6 +264,8 @@ install_aur_package() {
     fi
 }
 
+AUR_ERRORS=0
+
 # Install each AUR package from config
 if [[ -f "$AUR_PACKAGES_FILE" ]]; then
     while IFS= read -r pkg || [[ -n "$pkg" ]]; do
@@ -274,6 +277,11 @@ else
 fi
 
 rm -rf "$AUR_BUILD_DIR"
+
+if [[ $AUR_ERRORS -gt 0 ]]; then
+    echo "  *** $AUR_ERRORS AUR package(s) failed - aborting build ***"
+    exit 1
+fi
 
 # -----------------------------------------------------------------------------
 # 6. Basic configuration
