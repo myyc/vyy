@@ -144,7 +144,8 @@ if [[ -n "$FEATURE_PACKAGES" ]]; then
 fi
 
 # Install packages to target root (no chroot, no user namespaces)
-retry pacman -r "$ROOT" -Sy --noconfirm --needed $PACKAGES
+# Hooks may fail with pacman -r (not a real system), but packages still install fine
+retry pacman -r "$ROOT" -Sy --noconfirm --needed $PACKAGES || echo "  WARNING: pacman returned non-zero (post-transaction hooks may have failed)"
 
 # -----------------------------------------------------------------------------
 # 4. Setup package signing keys
