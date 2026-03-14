@@ -6,8 +6,7 @@ FROM @BASE_IMAGE@
 # Refresh keyrings and install build tools
 RUN pacman-key --init && \
     pacman-key --populate archlinux cachyos && \
-    pacman -Syu --noconfirm && \
-    pacman -S --noconfirm \
+    pacman -Syu --noconfirm \
         arch-install-scripts \
         ostree \
         dosfstools \
