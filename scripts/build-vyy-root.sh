@@ -259,7 +259,7 @@ install_aur_package() {
     cached_pkg=$(ls "$AUR_CACHE"/${pkg}-*.pkg.tar.zst 2>/dev/null | head -1)
     if [[ -n "$cached_pkg" ]]; then
         echo "  Installing $pkg..."
-        pacman -r "$ROOT" -U --noconfirm "$cached_pkg"
+        pacman -r "$ROOT" -U --noconfirm --hookdir /dev/null "$cached_pkg"
     else
         echo "  ERROR: $pkg not found in cache after build"
         return 1
