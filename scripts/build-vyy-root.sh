@@ -145,7 +145,7 @@ fi
 
 # Install packages to target root (no chroot, no user namespaces)
 # Hooks may fail with pacman -r (not a real system), but packages still install fine
-retry pacman -r "$ROOT" -Sy --noconfirm --needed $PACKAGES || echo "  WARNING: pacman returned non-zero (post-transaction hooks may have failed)"
+retry pacman -r "$ROOT" -Sy --noconfirm --needed $PACKAGES || true
 
 # -----------------------------------------------------------------------------
 # 4. Setup package signing keys
@@ -267,7 +267,7 @@ install_aur_package() {
 if [[ -f "$AUR_PACKAGES_FILE" ]]; then
     while IFS= read -r pkg || [[ -n "$pkg" ]]; do
         [[ "$pkg" =~ ^#.*$ || -z "$pkg" ]] && continue
-        install_aur_package "$pkg"
+        install_aur_package "$pkg" || true
     done < "$AUR_PACKAGES_FILE"
 else
     echo "  No AUR packages file found at $AUR_PACKAGES_FILE"
