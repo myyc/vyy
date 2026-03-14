@@ -146,9 +146,6 @@ fi
 # Install packages to target root (no chroot, no user namespaces)
 retry pacman -r "$ROOT" -Sy --noconfirm --needed $PACKAGES
 
-# Disable dracut hook before AUR installs (we regenerate initramfs in restructure.sh)
-ln -sf /dev/null "$ROOT/usr/share/libalpm/hooks/90-dracut-install.hook"
-
 # -----------------------------------------------------------------------------
 # 4. Setup package signing keys
 # -----------------------------------------------------------------------------
@@ -258,7 +255,7 @@ install_aur_package() {
     cached_pkg=$(ls "$AUR_CACHE"/${pkg}-*.pkg.tar.zst 2>/dev/null | head -1)
     if [[ -n "$cached_pkg" ]]; then
         echo "  Installing $pkg..."
-        pacman -r "$ROOT" -U --noconfirm "$cached_pkg"
+        pacman -r "$ROOT" -U --noconfirm "$cached_pkg" || echo "  WARNING: $pkg install returned non-zero (hooks may have failed)"
     else
         echo "  ERROR: $pkg not found in cache after build"
         return 1
