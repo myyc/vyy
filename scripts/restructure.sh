@@ -347,6 +347,14 @@ if [[ -f "$ROOT/usr/lib/systemd/system/cups.socket" ]]; then
     cp "$CONFIG_DIR/cupsd.conf" "$ROOT/usr/etc/cups/cupsd.conf"
 fi
 
+# Waydroid: disable nft and iptables-legacy in networking script
+# (conflicts with Docker/nftables, see https://github.com/waydroid/waydroid/issues/2023)
+WAYDROID_NET="$ROOT/usr/lib/waydroid/data/scripts/waydroid-net.sh"
+if [[ -f "$WAYDROID_NET" ]]; then
+    sed -i -E 's/=.\$\(command -v (nft|ip6?tables-legacy).*/=/' "$WAYDROID_NET"
+    echo "  Patched waydroid-net.sh (force iptables over nft/legacy)"
+fi
+
 # -----------------------------------------------------------------------------
 # 11. REGENERATE LINKER CACHE
 # -----------------------------------------------------------------------------
