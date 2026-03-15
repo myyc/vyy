@@ -4,6 +4,7 @@
 
 bootc
 mullvad-vpn-bin
+waydroid
 ibus-m17n
 raw-thumbnailer
 epson-inkjet-printer-escpr2
