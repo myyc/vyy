@@ -75,6 +75,7 @@ distrobox
 flatpak
 lxc
 sshfs
+waydroid
 
 # =============================================================================
 # Desktop - GNOME

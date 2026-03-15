@@ -3,8 +3,8 @@
 # Format: one package name per line
 
 bootc
+mullvad-vpn-daemon-bin
 mullvad-vpn-bin
-waydroid
 ibus-m17n
 raw-thumbnailer
 epson-inkjet-printer-escpr2
